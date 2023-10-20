@@ -1,0 +1,18 @@
+{
+  "name": "desktop-img-resizer",
+  "productName": "Image resizer",
+  "version": "1.0.0",
+  "description": "App to resize image dimensions",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Siaw Henry Nartey",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^27.0.1",
+    "electronmon": "^2.0.2",
+    "resize-img": "^2.0.0",
+    "toastify-js": "^1.12.0"
+  }
+}
