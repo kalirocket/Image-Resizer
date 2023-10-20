@@ -5,12 +5,11 @@ const filename = document.querySelector('#filename');
 const height_input = document.querySelector('#height');
 const width_input = document.querySelector('#width');
 
-
 const loadImage = (e) => {
     const file = e.target.files[0];
 
     if (!isFileImage(file)) {
-        console.log('Please select an image');
+        alert_('Please select an image', true);
         return null;
     }
 
@@ -22,6 +21,8 @@ const loadImage = (e) => {
         height_input.value = this.height;
     }
 
+    output_path.textContent = path.join(os.homedir(), '/imageresizer');
+
     form.classList.remove('hidden');
     filename.textContent = file.name;
 }
@@ -30,6 +31,19 @@ const loadImage = (e) => {
 function isFileImage(file) {
     const accepted_image_types = ['image/gif', 'image/png', 'image/jpg', 'image/jpeg'];
     return file && accepted_image_types.includes(file['type']);
+}
+
+function alert_(message, is_error = false) {
+    Toastify.toast({
+        text: message,
+        duration: 5000,
+        close: false,
+        style: {
+            background: is_error ? 'red' : 'green',
+            color: 'white',
+            textAlign: 'center'
+        }
+    })
 }
 
 img.addEventListener('change', loadImage);
