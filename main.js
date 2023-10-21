@@ -1,12 +1,18 @@
-const {app, BrowserWindow, Menu} = require('electron');
+const {app, BrowserWindow, Menu, ipcMain, shell} = require('electron');
 const path = require('path');
-
+const os = require('os');
 const isDev = process.env.NODE_ENV !== 'production';
 const isMac = process.platform === 'darwin';
+const fs = require('fs');
+const resizeImg = require('resize-img');
+
+
+let mainWindow;
+let aboutWindow;
 
 // Create the main window
 function createMainWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         title: 'Image Resizer',
         width: isDev ? 1000 : 500,
         height: 600,
@@ -27,7 +33,7 @@ function createMainWindow() {
 
 // Create about window
 function createAboutWindow() {
-    const aboutWindow = new BrowserWindow({
+    aboutWindow = new BrowserWindow({
         title: 'About Image Resizer',
         width: 300,
         height: 300
@@ -83,7 +89,43 @@ app.whenReady().then(() => {
     });
 
 
-})
+});
+
+// Resize image
+async function resizeImage({imgPath, height, width, destination}) {
+    try {
+        const newPath = await resizeImg(fs.readFileSync(imgPath), {
+            width: +width,
+            height: +height
+        });
+
+        // Create filename
+        const filename = path.basename(imgPath);
+        // Create destination folder if it's not present
+        if (!fs.existsSync(destination)) {
+            fs.mkdirSync(destination);
+        }
+
+        // Write the file to the destination folder
+        fs.writeFileSync(path.join(destination, filename), newPath);
+
+        // Send success back to the render probably
+        mainWindow.webContents.send('image:done');
+
+        // Open destination folder
+        shell.openPath(destination);
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+// Respond to ipcRenderer resize
+ipcMain.on('image:resizer', (e, options) => {
+    options.destination = path.join(os.homedir(), 'imageresizer');
+    resizeImage(options);
+});
+
 
 app.on('window-all-closed', () => {
     if (!isMac) {

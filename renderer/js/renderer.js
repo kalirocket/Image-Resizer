@@ -21,11 +21,42 @@ const loadImage = (e) => {
         height_input.value = this.height;
     }
 
-    output_path.textContent = path.join(os.homedir(), '/imageresizer');
+    output_path.textContent = path.join(os.homedir(), 'imageresizer');
 
     form.classList.remove('hidden');
     filename.textContent = file.name;
 }
+
+// Send image data to main
+const sendImage = (e) => {
+    e.preventDefault();
+
+    const width = width_input.value;
+    const height = height_input.value
+    const imgPath = img.files[0].path;
+
+    if (!img.files[0]) {
+        alert_('Please upload an image!', true);
+        return null;
+    }
+
+    if (width === '' || height.value === '') {
+        alert_('Please fill in a height and width', true);
+        return null;
+    }
+
+    // Send to main using ipcRenderer
+    ipcRenderer.send('image:resizer', {
+        imgPath,
+        height,
+        width
+    });
+}
+
+// Catch the image:done event
+ipcRenderer.on('image:done', () => {
+    alert_(`Image resized to ${width_input.value} x ${height_input.value}`, false);
+});
 
 // Make sure file is image
 function isFileImage(file) {
@@ -47,3 +78,4 @@ function alert_(message, is_error = false) {
 }
 
 img.addEventListener('change', loadImage);
+form.addEventListener('submit', sendImage);
